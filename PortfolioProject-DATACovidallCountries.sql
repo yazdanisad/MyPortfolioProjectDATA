@@ -1,14 +1,14 @@
 ----Part One: work on One table, calculate, function and General Commands ...-----
 
 
---select the Data that we are going to using 
+--Select the Data that we are going to using 
 
 Select * 
 From portfolioProject.dbo.coviddeaths
 where continent is not null
 order by 3,4
---select * 
---from portfolioProject.dbo.covidvaccination
+--Select * 
+--From portfolioProject.dbo.covidvaccination
 --order by 3,4
 
 
@@ -54,7 +54,7 @@ where continent is not null
 group by country 
 order by TotaldeathCount DESC
 
---break  Data down by continent
+--Break Data down by continent
 
 Select continent,Max(Cast(total_deaths as int)) as TotaldeathCount 
 From portfolioProject.dbo.coviddeaths
@@ -67,7 +67,7 @@ order by TotaldeathCount DESC
 --Global numbers per every day  and solution for divide by zero condition.
 
 Select date,sum(new_cases)as TotalCases,sum(new_deaths) as TotalDeaths,
-(Select Case
+(Select case
 			when sum(new_cases) = 0
 			then 0
 			else sum(new_deaths)/sum(cast(new_cases as int))*100
@@ -80,12 +80,12 @@ order by 1
 --Total deaths and infected Covid.
 
 Select sum(new_cases)as TotalCases,sum(new_deaths) as TotalDeaths,
-(select case
+(Select case
 			when sum(new_cases) = 0
 			then 0
 			else sum(new_deaths)/sum(cast(new_cases as int))*100
  End) as DeathPercentage 
-from portfolioProject.dbo.coviddeaths
+From portfolioProject.dbo.coviddeaths
 where continent is not null
 --group by date
 --order by 1
@@ -94,7 +94,7 @@ where continent is not null
 
 ----Part Two: work on two tables, View, Temp Table and ...-----
 
-select * from portfolioProject..covidvaccination
+Select * From portfolioProject..covidvaccination
 where continent is not null
 order by 1
 
@@ -103,10 +103,10 @@ order by 1
 -- Update portfolioProject..covidvaccination set new_vaccinations=0 where new_vaccinations is null
 --look at the total population vs vaccinations
 
-select deat.continent,deat.country,deat.date, deat.population, vacc.new_vaccinations,
+Select deat.continent,deat.country,deat.date, deat.population, vacc.new_vaccinations,
 sum(convert(bigint,vacc.new_vaccinations)) OVER (Partition by vacc.country 
 order by vacc.country, vacc.date) as RollingPeopleVaccinated
-from portfolioProject..covidvaccination vacc
+From portfolioProject..covidvaccination vacc
 join portfolioProject..coviddeaths deat
 on vacc.country= deat.country
 and vacc.date=deat.date
@@ -118,18 +118,18 @@ order by 2,3
 
 with vaccinPopulation (continent,country,date,population,new_vaccinations, RollingPeopleVaccinated) 
 as
-(select deat.continent,deat.country,deat.date, deat.population, vacc.new_vaccinations,
+(Select deat.continent,deat.country,deat.date, deat.population, vacc.new_vaccinations,
 sum(convert(bigint,vacc.new_vaccinations)) OVER (Partition by vacc.country 
 order by vacc.country, vacc.date) as RollingPeopleVaccinated
-from portfolioProject..covidvaccination vacc
+From portfolioProject..covidvaccination vacc
 join portfolioProject..coviddeaths deat
 on vacc.country= deat.country
 and vacc.date=deat.date
 where deat.continent is not null)
 --order by 2,3)
 
-select * , (RollingPeopleVaccinated/population)*100
-from vaccinPopulation
+Select * , (RollingPeopleVaccinated/population)*100
+From vaccinPopulation
 
 
 
@@ -149,18 +149,18 @@ RollingPeopleVaccinated numeric
 
 Insert into #PercentPopulationVaccinated
 
-select deat.continent,deat.country,deat.date, deat.population, vacc.new_vaccinations,
+Select deat.continent,deat.country,deat.date, deat.population, vacc.new_vaccinations,
 sum(convert(bigint,vacc.new_vaccinations)) OVER (Partition by vacc.country 
 order by vacc.country, vacc.date) as RollingPeopleVaccinated
-from portfolioProject..covidvaccination vacc
+From portfolioProject..covidvaccination vacc
 join portfolioProject..coviddeaths deat
 on vacc.country= deat.country
 and vacc.date=deat.date
 where deat.continent is not null
 --order by 2,3)
 
-select * , (RollingPeopleVaccinated/population)*100
-from #PercentPopulationVaccinated
+Select * , (RollingPeopleVaccinated/population)*100
+From #PercentPopulationVaccinated
 
 
 --Create View to store Data for Visualization
@@ -169,13 +169,13 @@ from #PercentPopulationVaccinated
 Use portfolioProject
 go
 Create View PercentPopulationVaccinated as 
-select deat.continent,deat.country,deat.date, deat.population, vacc.new_vaccinations,
+Select deat.continent,deat.country,deat.date, deat.population, vacc.new_vaccinations,
 sum(convert(bigint,vacc.new_vaccinations)) OVER (Partition by vacc.country 
 order by vacc.country, vacc.date) as RollingPeopleVaccinated
-from portfolioProject..covidvaccination vacc
+From portfolioProject..covidvaccination vacc
 join portfolioProject..coviddeaths deat
 on vacc.country= deat.country
 and vacc.date=deat.date
 where deat.continent is not null
 
-Select * from PercentPopulationVaccinated
+Select * From PercentPopulationVaccinated
